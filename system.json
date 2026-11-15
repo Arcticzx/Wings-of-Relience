@@ -28,7 +28,7 @@
   "initiative": "2d6 + @attributes.agility.value",
   "primaryTokenAttribute": "resources.hp",
   "secondaryTokenAttribute": "resources.pa",
-  "url": "https://github.com/Arcticzx/wings-of-relience",
-  "manifest": "https://raw.githubusercontent.com/Arcticzx/wings-of-relience/main/system.json",
-  "download": "https://github.com/Arcticzx/wings-of-relience/archive/refs/heads/main.zip"
+  "url": "https://github.com/Arcticzx/Wings-of-Relience",
+  "manifest": "https://raw.githubusercontent.com/Arcticzx/Wings-of-Relience/main/system.json",
+  "download": "https://github.com/Arcticzx/Wings-of-Relience/archive/refs/heads/main.zip"
 }
