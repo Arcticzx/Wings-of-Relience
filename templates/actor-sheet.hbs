@@ -1,0 +1,690 @@
+<div class="wor">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,500;0,600;0,700;1,700&family=Exo+2:wght@400;500;600;700&display=swap');
+
+.wor {
+  --bg: #090c12;
+  --panel: #111722;
+  --panel-2: #161f2e;
+  --panel-3: #1c283b;
+  --platinum: #e2e8f0;
+  --silver: #94a3b8;
+  --muted: #64748b;
+  --line: rgba(148, 163, 184, 0.24);
+  --line-bright: rgba(226, 232, 240, 0.45);
+  --crimson: #ff2e55;
+  --crimson-d: #9e1432;
+  --cyan: #00e5ff;
+  --cyan-d: #0284c7;
+  --gold: #ffb703;
+  --gold-d: #b45309;
+  --emerald: #10b981;
+  --violet: #a855f7;
+  --display: 'Chakra Petch', 'Segoe UI', sans-serif;
+  --body: 'Exo 2', 'Segoe UI', Roboto, sans-serif;
+
+  container-type: inline-size;
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 14px; overflow-y: auto; max-height: 100%;
+  color: var(--platinum); color-scheme: dark;
+  font: 400 13.5px/1.35 var(--body);
+  background:
+    radial-gradient(90% 60% at 10% 0%, rgba(0, 229, 255, 0.09), transparent 60%),
+    radial-gradient(80% 60% at 95% 10%, rgba(255, 46, 85, 0.11), transparent 55%),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,0.015) 0 1px, transparent 1px 10px),
+    var(--bg);
+}
+.wor *, .wor *::before, .wor *::after { box-sizing: border-box; }
+.wor input, .wor select, .wor button { margin: 0; height: auto; box-shadow: none; text-shadow: none; font-family: inherit; }
+.wor label { margin: 0; color: inherit; }
+.wor svg { flex: none; }
+
+/* Paneles biselados estilo HUD post-cyberpunk / platino */
+.wor .wor-panel {
+  position: relative;
+  padding: 12px;
+  background: linear-gradient(165deg, rgba(22, 31, 46, 0.94), rgba(13, 18, 28, 0.98));
+  border: 1px solid var(--line);
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+}
+.wor .wor-panel::before {
+  content: ""; position: absolute; top: 0; left: 0; width: 34px; height: 2px;
+  background: var(--cyan); box-shadow: 0 0 8px rgba(0, 229, 255, 0.65); pointer-events: none;
+}
+
+.wor .wor-sec-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  margin: -2px 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.wor .wor-title {
+  margin: 0; display: inline-flex; align-items: center; gap: 7px;
+  font: 700 15px/1.1 var(--display); text-transform: uppercase; letter-spacing: .08em;
+  color: var(--platinum);
+}
+.wor .wor-title::before {
+  content: ""; width: 4px; height: 14px; background: var(--cyan);
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.7); transform: skewX(-18deg);
+}
+.wor .wor-title--crimson::before { background: var(--crimson); box-shadow: 0 0 8px rgba(255, 46, 85, 0.7); }
+.wor .wor-title--gold::before { background: var(--gold); box-shadow: 0 0 8px rgba(255, 183, 3, 0.7); }
+
+/* ───────── CABECERA FIGHTER HUD ───────── */
+.wor .wor-hud {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 14px; align-items: center;
+  padding: 12px 14px;
+  background:
+    linear-gradient(125deg, rgba(255, 46, 85, 0.14) 0%, rgba(17, 23, 34, 0.96) 40%, rgba(0, 229, 255, 0.12) 100%);
+  border: 1px solid var(--line-bright);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 8px 24px rgba(0,0,0,0.45);
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+}
+.wor .wor-portrait-wrap {
+  position: relative; width: 92px; height: 92px;
+  background: #06080d; border: 1px solid var(--cyan);
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.22);
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  overflow: hidden; cursor: pointer;
+}
+.wor .wor-portrait { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .2s, filter .2s; }
+.wor .wor-portrait-wrap:hover .wor-portrait { transform: scale(1.05); filter: brightness(1.12); }
+.wor .wor-portrait-tag {
+  position: absolute; bottom: 0; left: 0; right: 0; padding: 1px 4px;
+  background: rgba(9, 12, 18, 0.85); color: var(--cyan); text-align: center;
+  font: 700 9.5px/1.3 var(--display); letter-spacing: .08em; text-transform: uppercase;
+  pointer-events: none;
+}
+
+.wor .wor-hud-main { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+.wor .wor-id-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.wor .wor-name {
+  flex: 1; min-width: 180px; padding: 2px 4px 4px;
+  border: 0; border-bottom: 2px solid var(--line-bright); border-radius: 0;
+  background: transparent; color: #fff;
+  font: 700 26px/1.05 var(--display); text-transform: uppercase; letter-spacing: .04em;
+}
+.wor .wor-name::placeholder { color: var(--muted); font-style: italic; }
+.wor .wor-name:focus-visible { outline: none; border-bottom-color: var(--cyan); }
+
+.wor .wor-arch-badge {
+  padding: 4px 12px; border: 1px solid var(--gold);
+  background: linear-gradient(135deg, rgba(255, 183, 3, 0.18), rgba(180, 83, 9, 0.25));
+  color: var(--gold); font: 700 12px/1.2 var(--display); text-transform: uppercase; letter-spacing: .1em;
+  transform: skewX(-12deg);
+}
+.wor .wor-arch-badge span { display: inline-block; transform: skewX(12deg); }
+.wor .wor-arch-badge--empty { border-color: var(--line); background: rgba(255,255,255,0.04); color: var(--silver); }
+
+/* Gauges estilo Fighting Game */
+.wor .wor-gauges { display: grid; grid-template-columns: 1.25fr 1.1fr 1fr; gap: 10px; }
+.wor .wor-gauge-box {
+  padding: 6px 9px 7px;
+  background: rgba(8, 11, 18, 0.8);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+}
+.wor .wor-gauge-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 5px; }
+.wor .wor-g-label { font: 700 11px/1 var(--display); text-transform: uppercase; letter-spacing: .08em; color: var(--silver); }
+.wor .wor-g-label--hp { color: #ff6b86; }
+.wor .wor-g-label--pa { color: var(--cyan); }
+.wor .wor-g-label--conf { color: var(--gold); }
+
+.wor .wor-g-vals { display: inline-flex; align-items: center; gap: 4px; font: 700 15px/1 var(--display); font-variant-numeric: tabular-nums; }
+.wor .wor-g-input {
+  width: 44px; padding: 1px 3px; text-align: center;
+  border: 1px solid var(--line-bright); border-radius: 2px;
+  background: rgba(22, 31, 46, 0.95); color: #fff;
+  font: 700 16px/1.1 var(--display); font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield; appearance: textfield;
+}
+.wor .wor-g-input::-webkit-inner-spin-button, .wor .wor-g-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.wor .wor-g-input:focus-visible { outline: 1px solid var(--cyan); }
+.wor .wor-g-max { color: var(--silver); font-size: 13px; }
+
+.wor .wor-hp-track {
+  height: 9px; width: 100%; background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 46, 85, 0.45); overflow: hidden; transform: skewX(-16deg);
+}
+.wor .wor-hp-fill {
+  height: 100%; background: linear-gradient(90deg, #ff2e55 0%, #ff6b35 65%, #ffb703 100%);
+  box-shadow: 0 0 10px rgba(255, 46, 85, 0.6); transition: width .25s ease;
+}
+
+.wor .wor-pips { display: flex; gap: 3px; height: 9px; transform: skewX(-16deg); }
+.wor .wor-pip {
+  flex: 1; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(148, 163, 184, 0.25);
+  transition: background .15s, box-shadow .15s;
+}
+.wor .wor-pip--pa.active {
+  background: linear-gradient(180deg, #67f3ff, #00b4d8); border-color: var(--cyan);
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.55);
+}
+.wor .wor-pip--conf.active {
+  background: linear-gradient(180deg, #ffd166, #f59e0b); border-color: var(--gold);
+  box-shadow: 0 0 8px rgba(255, 183, 3, 0.55);
+}
+
+.wor .wor-reset {
+  display: inline-grid; place-items: center; width: 22px; height: 22px; padding: 0; cursor: pointer;
+  border: 1px solid var(--cyan); border-radius: 2px; background: rgba(0, 229, 255, 0.12); color: var(--cyan);
+  transition: background .15s, color .15s, transform .25s;
+}
+.wor .wor-reset:hover { background: var(--cyan); color: #05080f; transform: rotate(-90deg); }
+
+/* ───────── PESTAÑAS ARCADE ───────── */
+.wor .wor-tabs {
+  display: flex; gap: 6px; padding: 0 4px;
+  border-bottom: 2px solid var(--line);
+}
+.wor .wor-tablink {
+  position: relative; margin-bottom: -2px; padding: 7px 22px 6px;
+  border: 1px solid var(--line); border-bottom: 2px solid transparent;
+  background: rgba(17, 23, 34, 0.75); color: var(--silver);
+  text-decoration: none; cursor: pointer;
+  font: 700 14px/1.2 var(--display); text-transform: uppercase; letter-spacing: .09em;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  transition: background .15s, color .15s;
+}
+.wor .wor-tablink:hover { color: #fff; background: rgba(0, 229, 255, 0.12); }
+.wor .wor-tablink.active {
+  background: linear-gradient(135deg, var(--crimson), #c9184a);
+  border-color: var(--crimson); border-bottom-color: var(--gold); color: #fff;
+  box-shadow: 0 0 14px rgba(255, 46, 85, 0.35);
+}
+.wor .wor-page:not(.active) { display: none; }
+
+/* ───────── GRID PRINCIPAL ───────── */
+.wor .wor-body { display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 12px; align-items: start; }
+.wor .wor-col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+
+/* Selectores & Inputs */
+.wor .wor-select {
+  width: 100%; padding: 6px 28px 6px 10px; cursor: pointer;
+  border: 1px solid var(--line-bright); border-radius: 2px; color: #fff;
+  background: #0c111b url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%2300e5ff'/></svg>") no-repeat right 9px center;
+  font: 600 13.5px/1.3 var(--body); -webkit-appearance: none; -moz-appearance: none; appearance: none;
+}
+.wor .wor-select--inline { width: auto; min-width: 150px; }
+.wor .wor-select:focus-visible { outline: 1px solid var(--cyan); }
+.wor .wor-select option { background: #111722; color: #fff; }
+
+/* Info de Arquetipo */
+.wor .wor-arch-card { margin-top: 9px; padding: 8px 10px; background: rgba(8, 12, 20, 0.72); border: 1px solid var(--line); }
+.wor .wor-dice-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 8px; }
+.wor .wor-die-chip {
+  padding: 4px 2px; text-align: center;
+  background: linear-gradient(180deg, rgba(255, 183, 3, 0.14), rgba(255, 183, 3, 0.04));
+  border: 1px solid rgba(255, 183, 3, 0.4); border-radius: 2px;
+}
+.wor .wor-die-chip small { display: block; font: 700 10px/1 var(--display); color: var(--gold); letter-spacing: .06em; }
+.wor .wor-die-chip b { display: block; margin-top: 2px; font: 700 15px/1.1 var(--display); color: #fff; }
+.wor .wor-note { margin: 4px 0 0; font-size: 12px; line-height: 1.35; color: #cbd5e1; }
+.wor .wor-note strong { color: var(--cyan); }
+
+/* Atributos */
+.wor .wor-attr {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  padding: 5px 4px; border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+}
+.wor .wor-attr:last-of-type { border-bottom: 0; }
+.wor .wor-attr-roll {
+  display: inline-flex; align-items: center; gap: 8px; cursor: pointer; text-decoration: none;
+  font: 700 14.5px/1.2 var(--display); text-transform: uppercase; letter-spacing: .04em; color: var(--platinum);
+  transition: color .15s;
+}
+.wor .wor-attr-roll svg { color: var(--cyan); transition: transform .3s; }
+.wor .wor-attr-roll:hover { color: var(--cyan); }
+.wor .wor-attr-roll:hover svg { transform: rotate(60deg); }
+.wor .wor-attr-num {
+  width: 50px; padding: 3px 2px; text-align: center;
+  border: 1px solid var(--line-bright); border-radius: 2px;
+  background: #0a0e17; color: var(--cyan);
+  font: 700 19px/1.1 var(--display); font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield; appearance: textfield;
+}
+.wor .wor-attr-num::-webkit-inner-spin-button, .wor .wor-attr-num::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.wor .wor-attr-num:focus-visible { outline: 1px solid var(--cyan); }
+
+/* Estadísticas calculadas */
+.wor .wor-plates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.wor .wor-plate {
+  padding: 10px 10px 11px; text-align: center;
+  background: rgba(8, 12, 20, 0.78); border: 1px solid var(--line);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+}
+.wor .wor-plate-lab { display: block; font: 700 11.5px/1.2 var(--display); text-transform: uppercase; letter-spacing: .08em; color: var(--cyan); }
+.wor .wor-plate b { display: block; margin: 3px 0 2px; font: 700 34px/1 var(--display); color: #fff; font-variant-numeric: tabular-nums; }
+.wor .wor-plate small { font-size: 11.5px; color: var(--silver); }
+
+/* 22 Habilidades */
+.wor .wor-skills { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.wor .wor-skill {
+  display: flex; justify-content: space-between; align-items: center; gap: 6px;
+  padding: 6px 9px; border: 1px solid var(--line); border-radius: 2px;
+  background: rgba(9, 13, 21, 0.85); color: var(--platinum); cursor: pointer; text-align: left;
+  font: 600 12.5px/1.2 var(--body); transition: border-color .15s, background .15s, transform .08s;
+}
+.wor .wor-skill:hover { border-color: var(--cyan); background: rgba(0, 229, 255, 0.1); }
+.wor .wor-skill:active { transform: translateY(1px); }
+.wor .wor-skill-mod {
+  flex: none; padding: 1px 6px; border-radius: 2px;
+  background: rgba(0, 229, 255, 0.14); border: 1px solid rgba(0, 229, 255, 0.35);
+  color: var(--cyan); font: 700 11.5px/1.3 var(--display); font-variant-numeric: tabular-nums;
+}
+
+/* ───────── BOTONES ARCADE ───────── */
+.wor .wor-defs { display: flex; flex-direction: column; gap: 7px; }
+.wor .wor-btn {
+  display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; padding: 8px 11px;
+  border: 1px solid var(--bdr, var(--line-bright)); border-radius: 2px; cursor: pointer;
+  background: linear-gradient(135deg, var(--c1, #1e293b), var(--c2, #0f172a)); color: #fff;
+  font: 700 13.5px/1.15 var(--display); text-transform: uppercase; letter-spacing: .06em;
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  transition: filter .15s, transform .08s, box-shadow .15s;
+}
+.wor .wor-btn:hover { filter: brightness(1.18); box-shadow: 0 0 12px var(--glow, rgba(255,255,255,0.2)); }
+.wor .wor-btn:active { transform: translateY(1px); }
+.wor .wor-btn--guard { --c1: #334155; --c2: #1e293b; --bdr: #64748b; }
+.wor .wor-btn--parry { --c1: #e11d48; --c2: #9f1239; --bdr: #fb7185; --glow: rgba(255, 46, 85, 0.45); }
+.wor .wor-btn--quiebre { --c1: #d97706; --c2: #92400e; --bdr: #fbbf24; --glow: rgba(251, 191, 36, 0.4); }
+.wor .wor-btn--burla { --c1: #059669; --c2: #065f46; --bdr: #34d399; --glow: rgba(16, 185, 129, 0.4); }
+.wor .wor-btn--conf { --c1: #7e22ce; --c2: #4c1d95; --bdr: #c084fc; --glow: rgba(168, 85, 247, 0.45); }
+.wor .wor-btn--exec { --c1: #0284c7; --c2: #0c4a6e; --bdr: #38bdf8; --glow: rgba(0, 229, 255, 0.35); margin-top: 8px; }
+.wor .wor-btn--finisher { --c1: #dc2626; --c2: #7f1d1d; --bdr: #f87171; --glow: rgba(255, 46, 85, 0.45); margin-top: 8px; }
+.wor .wor-btn--sm { width: auto; padding: 5px 12px; font-size: 12px; }
+
+/* Barra de Control de Combate + Combo Fever */
+.wor .wor-bar {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;
+  padding: 10px 12px; background: linear-gradient(135deg, rgba(22, 31, 46, 0.95), rgba(11, 16, 26, 0.98));
+  border: 1px solid var(--line);
+}
+.wor .wor-bar-inline { display: flex; align-items: center; gap: 8px; }
+.wor .wor-bar-inline label { font: 700 12.5px/1.2 var(--display); text-transform: uppercase; letter-spacing: .06em; color: var(--silver); }
+
+.wor .wor-combo {
+  display: flex; align-items: center; gap: 10px; padding: 7px 14px; cursor: pointer;
+  border: 1px solid var(--line-bright); border-radius: 2px;
+  background: rgba(10, 14, 23, 0.9); color: var(--platinum);
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  transition: background .2s, border-color .2s, box-shadow .2s;
+}
+.wor .wor-combo:has(input:checked) {
+  border-color: var(--gold);
+  background:
+    repeating-linear-gradient(-45deg, rgba(255, 183, 3, 0.14) 0 6px, rgba(255, 46, 85, 0.28) 6px 12px),
+    linear-gradient(135deg, #881337, #4c0519);
+  color: #fff;
+  box-shadow: 0 0 16px rgba(255, 46, 85, 0.45);
+}
+.wor .wor-combo input {
+  display: grid; place-content: center; width: 17px; height: 17px; flex: none; cursor: pointer;
+  border: 2px solid var(--cyan); border-radius: 2px; background: rgba(0,0,0,0.4);
+  -webkit-appearance: none; appearance: none;
+}
+.wor .wor-combo:has(input:checked) input { border-color: var(--gold); }
+.wor .wor-combo input::after { content: ""; width: 8px; height: 8px; background: var(--gold); transform: scale(0); transition: transform .12s; }
+.wor .wor-combo input:checked::after { transform: scale(1); }
+.wor .wor-combo strong { font: 700 13px/1.1 var(--display); text-transform: uppercase; letter-spacing: .06em; }
+.wor .wor-combo small { display: block; margin-top: 2px; font-size: 11.5px; color: var(--gold); font-weight: 600; }
+
+/* Tarjetas de Moveset */
+.wor .wor-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.wor .wor-card {
+  position: relative; display: flex; flex-direction: column; justify-content: space-between;
+  padding: 10px 11px 11px 14px;
+  background: linear-gradient(160deg, rgba(16, 23, 36, 0.96), rgba(9, 13, 21, 0.98));
+  border: 1px solid var(--line); border-left: 4px solid var(--stripe, var(--cyan));
+  transition: border-color .15s, transform .1s;
+}
+.wor .wor-card:hover { border-color: var(--line-bright); border-left-color: var(--stripe, var(--cyan)); }
+.wor .wor-card--attack { --stripe: var(--crimson); }
+.wor .wor-card--combo { --stripe: var(--cyan); }
+.wor .wor-card--finisher { --stripe: var(--gold); }
+.wor .wor-card--utility { --stripe: var(--emerald); }
+.wor .wor-card--special { --stripe: var(--violet); }
+
+.wor .wor-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.wor .wor-card-name { font: 700 15.5px/1.15 var(--display); text-transform: uppercase; letter-spacing: .03em; color: #fff; }
+.wor .wor-card-name a { color: inherit; text-decoration: none; cursor: pointer; }
+.wor .wor-card-name a:hover { color: var(--cyan); }
+
+.wor .wor-cost {
+  display: inline-flex; align-items: baseline; gap: 3px; flex: none; padding: 2px 8px;
+  border: 1px solid var(--cyan); border-radius: 2px;
+  background: rgba(0, 229, 255, 0.12); color: var(--cyan);
+  font: 700 14px/1.1 var(--display); font-variant-numeric: tabular-nums;
+}
+.wor .wor-cost--disc { border-color: var(--emerald); background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+.wor .wor-cost small { font-size: 10px; opacity: .9; }
+
+.wor .wor-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.wor .wor-tag {
+  padding: 1px 6px; border: 1px solid var(--line); border-radius: 2px;
+  background: rgba(255, 255, 255, 0.04); color: var(--silver);
+  font: 600 10.5px/1.4 var(--display); text-transform: uppercase; letter-spacing: .04em;
+}
+.wor .wor-card-meta { margin: 6px 0 0; font-size: 12px; color: #cbd5e1; line-height: 1.3; }
+.wor .wor-card-meta strong { color: var(--gold); }
+
+.wor .wor-card-actions { display: flex; gap: 6px; align-items: center; margin-top: 8px; }
+.wor .wor-card-actions .wor-btn { margin-top: 0; flex: 1; }
+.wor .wor-iconbtn {
+  padding: 7px 10px; border: 1px solid var(--line-bright); border-radius: 2px; cursor: pointer;
+  background: rgba(255, 255, 255, 0.05); color: var(--platinum);
+  font: 700 11.5px/1 var(--display); text-transform: uppercase;
+}
+.wor .wor-iconbtn:hover { background: rgba(0, 229, 255, 0.18); border-color: var(--cyan); }
+.wor .wor-iconbtn--del:hover { background: rgba(255, 46, 85, 0.25); border-color: var(--crimson); color: #fff; }
+
+.wor .wor-empty {
+  padding: 16px; text-align: center; border: 1px dashed var(--line-bright);
+  color: var(--silver); font: 500 13px/1.4 var(--body); background: rgba(9, 13, 21, 0.5);
+}
+
+/* Responsive */
+@container (max-width: 680px) {
+  .wor .wor-hud { grid-template-columns: 1fr; }
+  .wor .wor-portrait-wrap { margin: 0 auto; }
+  .wor .wor-gauges { grid-template-columns: 1fr; }
+  .wor .wor-body { grid-template-columns: 1fr; }
+}
+@container (max-width: 480px) {
+  .wor .wor-actions, .wor .wor-skills { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { .wor *, .wor *::before { transition: none !important; } }
+</style>
+
+  <!-- CABECERA ARCADE FIGHTER HUD -->
+  <header class="wor-hud">
+    <div class="wor-portrait-wrap">
+      <img class="wor-portrait" src="{{actor.img}}" data-action="editImage" data-field="img" alt="{{actor.name}}" title="Haz clic para cambiar el retrato"/>
+      <span class="wor-portrait-tag">Retrato</span>
+    </div>
+
+    <div class="wor-hud-main">
+      <div class="wor-id-row">
+        <input class="wor-name" name="name" type="text" value="{{actor.name}}" placeholder="NOMBRE DEL LUCHADOR"/>
+        {{#if activeArchetype}}
+        <div class="wor-arch-badge"><span>{{activeArchetype.label}}</span></div>
+        {{else}}
+        <div class="wor-arch-badge wor-arch-badge--empty"><span>Sin Arquetipo</span></div>
+        {{/if}}
+      </div>
+
+      <div class="wor-gauges">
+        <!-- HP BAR -->
+        <div class="wor-gauge-box">
+          <div class="wor-gauge-top">
+            <span class="wor-g-label wor-g-label--hp">Vitalidad (HP)</span>
+            <div class="wor-g-vals">
+              <input class="wor-g-input" type="number" name="system.resources.hp.value" value="{{system.resources.hp.value}}"/>
+              <span class="wor-g-max">/ {{system.resources.hp.max}}</span>
+            </div>
+          </div>
+          <div class="wor-hp-track">
+            <div class="wor-hp-fill" style="width: {{hpPercent}}%;"></div>
+          </div>
+        </div>
+
+        <!-- PA SEGMENTED METER -->
+        <div class="wor-gauge-box">
+          <div class="wor-gauge-top">
+            <span class="wor-g-label wor-g-label--pa">Acción (PA)</span>
+            <div class="wor-g-vals">
+              <input class="wor-g-input" type="number" name="system.resources.pa.value" value="{{system.resources.pa.value}}" min="0"/>
+              <span class="wor-g-max">/ {{system.resources.pa.max}}</span>
+              <button type="button" class="wor-reset" data-action="resetPA" title="Recargar PA y resetear Combo">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 0-2.4 5.7"/><path d="M20 4v6h-6"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="wor-pips">
+            {{#each paSegments}}
+            <span class="wor-pip wor-pip--pa {{#if active}}active{{/if}}"></span>
+            {{/each}}
+          </div>
+        </div>
+
+        <!-- CONFIANZA SUPER METER -->
+        <div class="wor-gauge-box">
+          <div class="wor-gauge-top">
+            <span class="wor-g-label wor-g-label--conf">Confianza</span>
+            <div class="wor-g-vals">
+              <input class="wor-g-input" type="number" name="system.resources.confidence.value" value="{{system.resources.confidence.value}}" min="0" max="10"/>
+              <span class="wor-g-max">/ {{system.resources.confidence.max}}</span>
+            </div>
+          </div>
+          <div class="wor-pips">
+            {{#each confidenceSegments}}
+            <span class="wor-pip wor-pip--conf {{#if active}}active{{/if}}"></span>
+            {{/each}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- PESTAÑAS -->
+  <nav class="tabs wor-tabs" data-group="primary">
+    <a class="wor-tablink {{#if tabs}}{{tabs.overview.cssClass}}{{else}}active{{/if}}" data-action="tab" data-group="primary" data-tab="overview">Perfil // Stats</a>
+    <a class="wor-tablink {{#if tabs}}{{tabs.combat.cssClass}}{{/if}}" data-action="tab" data-group="primary" data-tab="combat">Arena // Combate</a>
+  </nav>
+
+  <!-- PÁGINA 1: OVERVIEW -->
+  <section class="tab wor-page wor-body {{#if tabs}}{{tabs.overview.cssClass}}{{else}}active{{/if}}" data-group="primary" data-tab="overview">
+    <div class="wor-col">
+      <!-- ARQUETIPO -->
+      <div class="wor-panel">
+        <div class="wor-sec-head">
+          <h3 class="wor-title wor-title--gold">Arquetipo</h3>
+        </div>
+        <select class="wor-select" name="system.archetype">
+          {{#each archetypeOptions}}
+          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          {{/each}}
+        </select>
+
+        {{#if activeArchetype}}
+        <div class="wor-arch-card">
+          <div class="wor-dice-grid">
+            <div class="wor-die-chip"><small>GPL</small><b>{{activeArchetype.diceDisplay.ligero}}</b></div>
+            <div class="wor-die-chip"><small>GPM</small><b>{{activeArchetype.diceDisplay.medio}}</b></div>
+            <div class="wor-die-chip"><small>GPP</small><b>{{activeArchetype.diceDisplay.pesado}}</b></div>
+            <div class="wor-die-chip"><small>L</small><b>{{activeArchetype.diceDisplay.lanzamiento}}</b></div>
+          </div>
+          <p class="wor-note"><strong>Mod. inicial:</strong> {{activeArchetype.initialBonus}}</p>
+          <p class="wor-note"><strong>Pasiva:</strong> {{activeArchetype.passive}}</p>
+        </div>
+        {{/if}}
+      </div>
+
+      <!-- ATRIBUTOS -->
+      <div class="wor-panel">
+        <div class="wor-sec-head">
+          <h3 class="wor-title">Atributos (-1 a 10)</h3>
+        </div>
+        {{#each system.attributes as |attr key|}}
+        <div class="wor-attr">
+          <a class="wor-attr-roll" data-action="rollAttr" data-attr="{{key}}" title="Tirar Prueba de Valor (2d6 + {{attr.label}})">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 2l9 5.2v9.6L12 22l-9-5.2V7.2z"/><path d="M12 7l4.5 8h-9z"/></svg>
+            {{attr.label}}
+          </a>
+          <input class="wor-attr-num" type="number" name="system.attributes.{{key}}.value" value="{{attr.value}}" min="-1" max="10"/>
+        </div>
+        {{/each}}
+      </div>
+    </div>
+
+    <div class="wor-col">
+      <!-- ESTADÍSTICAS CALCULADAS -->
+      <div class="wor-panel">
+        <div class="wor-sec-head">
+          <h3 class="wor-title wor-title--crimson">Telemetría de Combate</h3>
+        </div>
+        <div class="wor-plates">
+          <div class="wor-plate">
+            <span class="wor-plate-lab">Velocidad (VM)</span>
+            <b>{{system.derived.turnVM}}</b>
+            <small>{{#if system.combat.sprintBonus}}Base {{system.derived.vm}} + {{system.combat.sprintBonus}} Sprint{{else}}casillas / turno (mín. 2){{/if}}</small>
+          </div>
+          <div class="wor-plate">
+            <span class="wor-plate-lab">Mitigación (MT)</span>
+            <b>{{system.derived.mt}}</b>
+            <small>[Voluntad / 2] + 2</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- 22 HABILIDADES -->
+      <div class="wor-panel">
+        <div class="wor-sec-head">
+          <h3 class="wor-title">Habilidades (22)</h3>
+        </div>
+        <div class="wor-skills">
+          {{#each skillsList}}
+          <button type="button" class="wor-skill" data-action="rollSkill" data-skill="{{key}}" title="{{description}} (2d6 {{modDisplay}})">
+            <span>{{name}}</span>
+            <span class="wor-skill-mod">{{attrShort}} {{modDisplay}}</span>
+          </button>
+          {{/each}}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PÁGINA 2: COMBATE -->
+  <section class="tab wor-page wor-body {{#if tabs}}{{tabs.combat.cssClass}}{{/if}}" data-group="primary" data-tab="combat">
+    <div class="wor-col">
+      <div class="wor-panel">
+        <div class="wor-sec-head">
+          <h3 class="wor-title wor-title--crimson">Defensa y Reacciones</h3>
+        </div>
+        <div class="wor-defs">
+          <button type="button" class="wor-btn wor-btn--guard" data-action="rollGuard">
+            Tirar Guardia (0 PA)
+          </button>
+          <button type="button" class="wor-btn wor-btn--parry" data-action="rollParry">
+            Parry (+1d4 | 1 PA)
+          </button>
+          <button type="button" class="wor-btn wor-btn--quiebre" data-action="useQuiebre">
+            Quiebre (Reacción | 2 PA)
+          </button>
+        </div>
+      </div>
+
+      <div class="wor-panel">
+        <div class="wor-sec-head">
+          <h3 class="wor-title wor-title--gold">Confianza y Táctica</h3>
+        </div>
+        <div class="wor-defs">
+          <button type="button" class="wor-btn wor-btn--burla" data-action="useBurla">
+            Burla (1 PA → +1 Confianza)
+          </button>
+          <button type="button" class="wor-btn wor-btn--conf" data-action="useReroll">
+            Re-roll (-1 Confianza)
+          </button>
+          <button type="button" class="wor-btn wor-btn--conf" data-action="useCancel">
+            Cancel (-1 Confianza)
+          </button>
+        </div>
+        {{#if activeArchetype}}
+        <div class="wor-arch-card">
+          <p class="wor-note"><strong>{{activeArchetype.label}}:</strong> {{activeArchetype.passive}}</p>
+        </div>
+        {{/if}}
+      </div>
+    </div>
+
+    <div class="wor-col">
+      <!-- BARRA DE COMBO Y ATRIBUTO DE ATAQUE -->
+      <div class="wor-bar">
+        <div class="wor-bar-inline">
+          <label>Atributo de Ataque:</label>
+          <select class="wor-select wor-select--inline" name="system.combat.attackStat">
+            <option value="technique" {{#if isAtkTechnique}}selected{{/if}}>Técnica</option>
+            <option value="might" {{#if isAtkMight}}selected{{/if}}>Poder</option>
+            <option value="agility" {{#if isAtkAgility}}selected{{/if}}>Agilidad</option>
+          </select>
+        </div>
+        <label class="wor-combo">
+          <input type="checkbox" name="system.combat.inCombo" {{#if system.combat.inCombo}}checked{{/if}}/>
+          <div>
+            <strong>{{#if system.combat.inCombo}}COMBO ACTIVO · {{system.combat.comboHits}} HITS{{else}}EN COMBO (Hit-Confirm / -1 PA / +6 Remate){{/if}}</strong>
+            {{#if system.combat.inCombo}}
+            <small>Conecta auto · Mitigación extra rival: +{{system.derived.comboMitigation}} MT</small>
+            {{/if}}
+          </div>
+        </label>
+      </div>
+
+      <!-- MOVESET UNIVERSAL -->
+      <div class="wor-panel">
+        <div class="wor-sec-head">
+          <h3 class="wor-title wor-title--crimson">Command List // Moveset Universal</h3>
+        </div>
+        <div class="wor-actions">
+          {{#each universalActions}}
+          <div class="wor-card wor-card--{{variant}}">
+            <div>
+              <div class="wor-card-top">
+                <strong class="wor-card-name">{{name}}</strong>
+                <span class="wor-cost {{#if discounted}}wor-cost--disc{{/if}}">{{paCost}} <small>PA</small></span>
+              </div>
+              <div class="wor-tags">
+                {{#each tags as |tag|}}<span class="wor-tag">{{tag}}</span>{{/each}}
+              </div>
+              {{#if dmgPreview}}
+              <p class="wor-card-meta"><strong>Daño:</strong> {{dmgPreview}}</p>
+              {{/if}}
+              <p class="wor-card-meta">{{effectText}}</p>
+            </div>
+            <button type="button" class="wor-btn {{#if dmgPreview}}wor-btn--finisher{{else}}wor-btn--exec{{/if}}" data-action="useAction" data-action-key="{{key}}">
+              Ejecutar
+            </button>
+          </div>
+          {{/each}}
+        </div>
+      </div>
+
+      <!-- MOVIMIENTOS ESPECIALES -->
+      <div class="wor-panel">
+        <div class="wor-sec-head">
+          <h3 class="wor-title">Movimientos Especiales</h3>
+          <button type="button" class="wor-btn wor-btn--parry wor-btn--sm" data-action="createSpecial">+ Nuevo Especial</button>
+        </div>
+        {{#if specialMoves.length}}
+        <div class="wor-actions">
+          {{#each specialMoves}}
+          <div class="wor-card wor-card--special">
+            <div>
+              <div class="wor-card-top">
+                <strong class="wor-card-name"><a data-action="editItem" data-item-id="{{id}}">{{name}}</a></strong>
+                <span class="wor-cost {{#if discounted}}wor-cost--disc{{/if}}">{{effectiveCost}} <small>PA</small></span>
+              </div>
+              <div class="wor-tags">
+                <span class="wor-tag">{{system.balance.label}} ({{system.balance.clampedPoints}})</span>
+                {{#each system.computedTags as |tag|}}<span class="wor-tag">{{tag}}</span>{{/each}}
+              </div>
+              <p class="wor-card-meta">
+                <strong>Valor Base:</strong> {{system.damageBase}}
+                {{#if system.trigger}} · <strong>Gatillo:</strong> {{system.trigger}}{{/if}}
+              </p>
+            </div>
+            <div class="wor-card-actions">
+              <button type="button" class="wor-btn wor-btn--exec" data-action="useSpecial" data-item-id="{{id}}">Ejecutar</button>
+              <button type="button" class="wor-iconbtn" data-action="editItem" data-item-id="{{id}}" title="Editar Movimiento Especial">Editar</button>
+              <button type="button" class="wor-iconbtn wor-iconbtn--del" data-action="deleteItem" data-item-id="{{id}}" title="Eliminar">✕</button>
+            </div>
+          </div>
+          {{/each}}
+        </div>
+        {{else}}
+        <div class="wor-empty">Sin Movimientos Especiales. Pulsa "+ Nuevo Especial" para forjar uno en el Laboratorio de Balanceo.</div>
+        {{/if}}
+      </div>
+    </div>
+  </section>
+</div>

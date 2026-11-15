@@ -1,0 +1,256 @@
+<div class="wor">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Exo+2:wght@400;500;600;700&display=swap');
+
+.wor {
+  --bg: #090c12;
+  --panel: #111722;
+  --platinum: #e2e8f0;
+  --silver: #94a3b8;
+  --line: rgba(148, 163, 184, 0.25);
+  --line-bright: rgba(226, 232, 240, 0.45);
+  --crimson: #ff2e55;
+  --cyan: #00e5ff;
+  --gold: #ffb703;
+  --emerald: #10b981;
+  --display: 'Chakra Petch', 'Segoe UI', sans-serif;
+  --body: 'Exo 2', 'Segoe UI', Roboto, sans-serif;
+
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 14px; overflow-y: auto; max-height: 100%;
+  color: var(--platinum); color-scheme: dark;
+  font: 400 13.5px/1.35 var(--body);
+  background:
+    radial-gradient(90% 60% at 15% 0%, rgba(0, 229, 255, 0.09), transparent 60%),
+    radial-gradient(80% 60% at 95% 10%, rgba(255, 46, 85, 0.1), transparent 55%),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,0.015) 0 1px, transparent 1px 10px),
+    var(--bg);
+}
+.wor *, .wor *::before, .wor *::after { box-sizing: border-box; }
+.wor input, .wor select, .wor textarea { margin: 0; box-shadow: none; text-shadow: none; font-family: inherit; }
+
+.wor .wor-panel {
+  position: relative; padding: 12px;
+  background: linear-gradient(165deg, rgba(22, 31, 46, 0.94), rgba(13, 18, 28, 0.98));
+  border: 1px solid var(--line);
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+}
+.wor .wor-panel::before {
+  content: ""; position: absolute; top: 0; left: 0; width: 32px; height: 2px;
+  background: var(--cyan); box-shadow: 0 0 8px rgba(0, 229, 255, 0.65); pointer-events: none;
+}
+
+.wor .wor-title {
+  margin: 0 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; gap: 7px;
+  font: 700 14.5px/1.1 var(--display); text-transform: uppercase; letter-spacing: .08em; color: var(--platinum);
+}
+.wor .wor-title::before {
+  content: ""; width: 4px; height: 14px; background: var(--cyan);
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.7); transform: skewX(-18deg);
+}
+
+.wor .wor-hud {
+  display: grid; grid-template-columns: minmax(0, 1.8fr) repeat(2, minmax(0, .68fr));
+  gap: 10px; align-items: center; padding: 12px 14px;
+  background: linear-gradient(125deg, rgba(0, 229, 255, 0.12), rgba(17, 23, 34, 0.96) 55%, rgba(255, 46, 85, 0.14));
+  border: 1px solid var(--line-bright);
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+}
+.wor .wor-name {
+  width: 100%; padding: 2px 2px 5px; border: 0; border-bottom: 2px solid var(--line-bright);
+  background: transparent; color: #fff;
+  font: 700 22px/1.1 var(--display); text-transform: uppercase; letter-spacing: .04em;
+}
+.wor .wor-name:focus-visible { outline: none; border-bottom-color: var(--cyan); }
+.wor .wor-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
+.wor .wor-tag {
+  padding: 1px 7px; border: 1px solid rgba(0, 229, 255, 0.35); border-radius: 2px;
+  background: rgba(0, 229, 255, 0.1); color: var(--cyan);
+  font: 700 10.5px/1.4 var(--display); text-transform: uppercase; letter-spacing: .05em;
+}
+
+.wor .wor-stat {
+  text-align: center; padding: 7px 6px;
+  background: rgba(8, 12, 20, 0.82); border: 1px solid var(--line-bright);
+}
+.wor .wor-lab { display: block; font: 700 11px/1.2 var(--display); text-transform: uppercase; letter-spacing: .08em; color: var(--silver); }
+.wor .wor-val { display: block; margin-top: 2px; font: 700 23px/1 var(--display); color: #fff; }
+.wor .wor-sub { display: block; margin-top: 2px; font-size: 11px; color: var(--gold); font-weight: 600; }
+
+/* Medidor de Balanceo */
+.wor .wor-meter { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.wor .wor-tier {
+  padding: 8px 6px; text-align: center; border: 1px solid var(--line);
+  background: rgba(8, 12, 20, 0.72); border-radius: 2px; opacity: .55;
+  transition: opacity .15s, border-color .15s, box-shadow .15s;
+}
+.wor .wor-tier.active {
+  opacity: 1; border-color: var(--gold);
+  background: linear-gradient(155deg, rgba(255, 46, 85, 0.35), rgba(255, 183, 3, 0.2));
+  box-shadow: 0 0 14px rgba(255, 183, 3, 0.25), inset 0 0 0 1px rgba(255, 183, 3, 0.45);
+}
+.wor .wor-tier strong { display: block; font: 700 13.5px/1.1 var(--display); text-transform: uppercase; color: #fff; }
+.wor .wor-tier span { display: block; font-size: 11px; margin-top: 3px; color: var(--silver); }
+.wor .wor-tier.active span { color: var(--platinum); }
+.wor .wor-meter-meta {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 8px; font: 700 12px/1.2 var(--display); text-transform: uppercase; letter-spacing: .05em; color: var(--cyan);
+}
+
+.wor .wor-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.wor .wor-field { display: flex; flex-direction: column; gap: 4px; }
+.wor .wor-field--full { grid-column: 1 / -1; }
+.wor .wor-field label { font: 700 12px/1.2 var(--display); text-transform: uppercase; letter-spacing: .06em; color: var(--silver); }
+
+.wor .wor-input, .wor .wor-select, .wor .wor-textarea {
+  width: 100%; padding: 6px 9px; border: 1px solid var(--line-bright); border-radius: 2px;
+  background: #0a0e17; color: #fff; font: 500 13.5px/1.3 var(--body);
+}
+.wor .wor-select {
+  padding-right: 28px; cursor: pointer;
+  background: #0a0e17 url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%2300e5ff'/></svg>") no-repeat right 9px center;
+  -webkit-appearance: none; -moz-appearance: none; appearance: none;
+}
+.wor .wor-select option, .wor .wor-select optgroup { background: #111722; color: #fff; }
+.wor .wor-input:focus-visible, .wor .wor-select:focus-visible, .wor .wor-textarea:focus-visible { outline: 1px solid var(--cyan); }
+
+.wor .wor-check {
+  display: flex; align-items: center; gap: 8px; padding: 7px 9px;
+  background: #0a0e17; border: 1px solid var(--line-bright); border-radius: 2px;
+  cursor: pointer; font-weight: 600; color: var(--platinum);
+}
+
+.wor .wor-slots { display: flex; flex-direction: column; gap: 8px; }
+.wor .wor-slot { display: grid; grid-template-columns: 105px minmax(0, 1fr); gap: 8px; align-items: center; }
+.wor .wor-slot label { font: 700 12.5px/1.2 var(--display); text-transform: uppercase; color: var(--cyan); }
+
+.wor .wor-prop-list { margin: 9px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.wor .wor-prop-item {
+  padding: 6px 9px; background: rgba(8, 12, 20, 0.78);
+  border: 1px solid var(--line); border-left: 3px solid var(--gold); font-size: 12.5px; color: #cbd5e1;
+}
+.wor .wor-prop-item strong { color: var(--gold); }
+
+.wor .wor-warn {
+  padding: 8px 10px; background: rgba(255, 46, 85, 0.16);
+  border: 1px solid var(--crimson); color: #fecdd3;
+  font-size: 12.5px; font-weight: 600; border-radius: 2px;
+}
+</style>
+
+  <!-- CABECERA -->
+  <header class="wor-hud">
+    <div>
+      <input class="wor-name" name="name" type="text" value="{{item.name}}" placeholder="NOMBRE DEL MOVIMIENTO ESPECIAL"/>
+      <div class="wor-tags">
+        {{#each system.computedTags as |tag|}}<span class="wor-tag">{{tag}}</span>{{/each}}
+      </div>
+    </div>
+    <div class="wor-stat">
+      <span class="wor-lab">Costo PA</span>
+      <span class="wor-val">{{system.paCost}} PA</span>
+      <span class="wor-sub">{{system.balance.label}}</span>
+    </div>
+    <div class="wor-stat">
+      <span class="wor-lab">Valor Base</span>
+      <span class="wor-val">{{system.damageBase}}</span>
+      <span class="wor-sub">
+        {{#if system.isInofensivo}}Sin daño{{else}}
+          {{#if hasMultiHit}}{{system.perHitDamageBase}} × {{system.hitCount}} golpes{{else}}Alcance defecto: Toque{{/if}}
+        {{/if}}
+      </span>
+    </div>
+  </header>
+
+  <!-- MEDIDOR DE BALANCEO -->
+  <section class="wor-panel">
+    <h3 class="wor-title">Medidor de Balanceo</h3>
+    <div class="wor-meter">
+      {{#each balanceTiers}}
+      <div class="wor-tier {{#if active}}active{{/if}}">
+        <strong>{{label}}</strong>
+        <span>({{range}})</span>
+        <span>{{paCost}} PA · Base {{baseValue}}</span>
+      </div>
+      {{/each}}
+    </div>
+    <div class="wor-meter-meta">
+      <span>Suma de Propiedades: {{rawPointsFormatted}}{{#if system.balance.isClamped}} → Ajustado a {{clampedPointsFormatted}} (rango -3 a +3){{/if}}</span>
+      <span>Slots: {{system.properties.length}} / {{maxSlots}}</span>
+    </div>
+  </section>
+
+  {{#if system.validationWarnings.length}}
+  <div class="wor-warn">
+    {{#each system.validationWarnings}}
+    <div>AVISO: {{this}}</div>
+    {{/each}}
+  </div>
+  {{/if}}
+
+  <!-- NATURALEZA DEL MOVIMIENTO -->
+  <section class="wor-panel">
+    <h3 class="wor-title">Naturaleza del Movimiento</h3>
+    <div class="wor-grid">
+      <div class="wor-field">
+        <label>Clase de Movimiento</label>
+        <select class="wor-select" name="system.moveType">
+          {{#each moveTypeOptions}}
+          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <div class="wor-field" style="justify-content:flex-end;">
+        <label class="wor-check">
+          <input type="checkbox" name="system.isProjectile" {{#if system.isProjectile}}checked{{/if}}/>
+          <span>Es Proyectil (Pasiva Zooner: cuenta como Combo)</span>
+        </label>
+      </div>
+      {{#if isReactive}}
+      <div class="wor-field wor-field--full">
+        <label>Gatillo (Obligatorio para Reactivo)</label>
+        <input class="wor-input" type="text" name="system.trigger" value="{{system.trigger}}" placeholder="Ej: Al recibir un ataque cuerpo a cuerpo..."/>
+      </div>
+      {{/if}}
+    </div>
+  </section>
+
+  <!-- SELECTOR DE PROPIEDADES -->
+  <section class="wor-panel">
+    <h3 class="wor-title">Propiedades (Máx. {{maxSlots}}{{#if isLibre}} por ser Libre{{/if}} · Máx. 2 iguales)</h3>
+    <div class="wor-slots">
+      {{#each propertySlots}}
+      <div class="wor-slot">
+        <label>Propiedad {{slotNumber}}</label>
+        <select class="wor-select" name="{{fieldName}}">
+          <option value="">— Ninguna —</option>
+          {{#each categories}}
+          <optgroup label="{{category}}">
+            {{#each options}}
+            <option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </optgroup>
+          {{/each}}
+        </select>
+      </div>
+      {{/each}}
+    </div>
+
+    {{#if selectedPropertyDetails.length}}
+    <ul class="wor-prop-list">
+      {{#each selectedPropertyDetails}}
+      <li class="wor-prop-item">
+        <strong>{{label}} ({{points}})</strong> [{{category}}]: {{description}}
+      </li>
+      {{/each}}
+    </ul>
+    {{/if}}
+  </section>
+
+  <!-- DESCRIPCIÓN -->
+  <section class="wor-panel">
+    <h3 class="wor-title">Descripción y Condiciones</h3>
+    <textarea class="wor-textarea" name="system.description" rows="3" placeholder="Describe la técnica, estética y condiciones especiales (ej. para 'Este ataque llegará a su destino')...">{{system.description}}</textarea>
+  </section>
+</div>

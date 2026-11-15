@@ -1,0 +1,34 @@
+{
+  "id": "wings-of-relience",
+  "title": "The Wings of Relience",
+  "description": "Sistema de rol táctico estilo Beat'em up y Fighting Games.",
+  "version": "1.0.0",
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "authors": [
+    { "name": "Arctic" }
+  ],
+  "esmodules": ["wings.mjs"],
+  "documentTypes": {
+    "Actor": {
+      "character": {},
+      "npc": {}
+    },
+    "Item": {
+      "specialMove": {},
+      "item": {}
+    }
+  },
+  "grid": {
+    "distance": 1,
+    "units": "casillas"
+  },
+  "initiative": "2d6 + @attributes.agility.value",
+  "primaryTokenAttribute": "resources.hp",
+  "secondaryTokenAttribute": "resources.pa",
+  "url": "https://github.com/Arcticzx/wings-of-relience",
+  "manifest": "https://raw.githubusercontent.com/Arcticzx/wings-of-relience/main/system.json",
+  "download": "https://github.com/Arcticzx/wings-of-relience/archive/refs/heads/main.zip"
+}
