@@ -613,58 +613,30 @@ class WingsActor extends Actor {
       });
     }
 
-    const comboResult = await this.#applyAttackSpendAndCombo({
-      paCost: finalCost,
-      isIniciador,
-      isCombo,
-      isRemate,
-      isGrapplerThrow: sys.archetype === "grappler" && actionKey === "lanzamiento"
-    });
-
     const archDie = action.archetypeDieKey ? getArchetypeAttackDie(sys.archetype, action.archetypeDieKey) : null;
-    const flatDmg = action.dmgFlat(attrs) + (comboResult.isFinisherTriggered ? WINGS_CONFIG.combatRules.finisherBonusDamage : 0);
-    const dmgFormula = archDie ? `${archDie} + ${flatDmg}` : `${flatDmg}`;
-    const dmgRoll = archDie ? await new Roll(dmgFormula).evaluate() : null;
-    const totalDamage = dmgRoll ? dmgRoll.total : flatDmg;
-    const diceDetail = dmgRoll
-      ? `${archDie} [${dmgRoll.dice.flatMap((d) => d.results.map((r) => r.result)).join(", ")}] + ${flatDmg}`
-      : `${flatDmg}`;
-
+    const baseFlatDmg = action.dmgFlat(attrs);
     const atkStatKey = sys.combat.attackStat || "technique";
     const baseAtkMod = attrs[atkStatKey]?.value ?? 0;
     const actionAtkBonus = action.atkBonus(attrs);
-    const passiveHtml = this.#buildAttackPassiveNotes(sys.archetype, attrs, comboResult);
-    const comboBannerHtml = this.#buildComboBannerHtml(comboResult);
+    const atkDisplayFormula = `2d6 ${formatSignedTerm(baseAtkMod)} ${formatSignedTerm(actionAtkBonus)}`;
+    const effectHtml = `<p style="font-size:12px;color:#555;margin:4px 0 0;">${effectDesc}</p>`;
 
-    if (comboResult.hitConfirmed) {
-      const flavor = `<div>
-        <h3 style="margin:0;">${action.name} (${finalCost} PA)</h3>
-        <div style="margin:4px 0;">${tagsHtml}</div>
-        ${comboBannerHtml}
-        <p style="font-size:14px;margin:4px 0;"><strong>Daño total:</strong> <span style="color:#c0392b;font-weight:bold;">${totalDamage}</span> <code>(${diceDetail})</code> <em>(Restar MT base +${comboResult.extraMitigation} del rival)</em></p>
-        ${passiveHtml}
-        <p style="font-size:12px;color:#555;margin:0;">${effectDesc}</p>
-      </div>`;
-
-      if (dmgRoll) {
-        return dmgRoll.toMessage({ speaker: ChatMessage.getSpeaker({ actor: this }), flavor });
-      }
-      return ChatMessage.create({ speaker: ChatMessage.getSpeaker({ actor: this }), content: flavor });
-    }
-
-    const atkFormula = `2d6 ${formatSignedTerm(baseAtkMod)} ${formatSignedTerm(actionAtkBonus)}`;
-    const atkRoll = await new Roll("2d6 + @base + @bonus", { base: baseAtkMod, bonus: actionAtkBonus }).evaluate();
-    await this.#recordLastRoll(atkFormula, action.name);
-
-    return atkRoll.toMessage({
-      speaker: ChatMessage.getSpeaker({ actor: this }),
-      flavor: `<div>
-        <h3 style="margin:0;">${action.name} (${finalCost} PA)</h3>
-        <div style="margin:4px 0;">${tagsHtml}</div>
-        <p style="font-size:14px;margin:4px 0;"><strong>Daño si conecta:</strong> <span style="color:#c0392b;font-weight:bold;">${totalDamage}</span> <code>(${diceDetail})</code> <em>(Restar MT del rival)</em></p>
-        ${passiveHtml}
-        <p style="font-size:12px;color:#555;margin:0;">${effectDesc}</p>
-      </div>`
+    return this.#dispatchAttackSequence({
+      title: action.name,
+      paCost: finalCost,
+      tagsHtml,
+      atkFormula: "2d6 + @base + @bonus",
+      atkRollData: { base: baseAtkMod, bonus: actionAtkBonus },
+      atkDisplayFormula,
+      archDiceTerms: archDie ? [archDie] : [],
+      flatDmg: baseFlatDmg,
+      hitCount: 1,
+      isAutoHit: false,
+      isIniciador,
+      isCombo,
+      isRemate,
+      isGrapplerThrow: sys.archetype === "grappler" && actionKey === "lanzamiento",
+      effectHtml
     });
   }
 
@@ -695,6 +667,10 @@ class WingsActor extends Actor {
       .filter(Boolean)
       .map((p) => `<li><strong>${p.label}:</strong> ${p.description}</li>`)
       .join("");
+    const effectHtml = [
+      propDescriptions ? `<ul style="font-size:12px;margin:4px 0 4px 16px;padding:0;">${propDescriptions}</ul>` : "",
+      mSys.description ? `<p style="font-size:12px;color:#555;margin:2px 0 0;">${mSys.description}</p>` : ""
+    ].join("");
 
     if (isInofensivo) {
       const nextCombo = sys.combat.inCombo ? (isCombo || isIniciador) : isIniciador;
@@ -715,21 +691,11 @@ class WingsActor extends Actor {
           <h3 style="margin:0;">${item.name} (${finalCost} PA)</h3>
           <div style="margin:4px 0;">${tagsHtml}</div>
           <p><strong>Valor de soporte / efecto base:</strong> ${mSys.supportBase ?? mSys.balance?.baseValue ?? mSys.damageBase}</p>
-          ${propDescriptions ? `<ul style="font-size:12px;margin:4px 0 4px 16px;padding:0;">${propDescriptions}</ul>` : ""}
-          ${mSys.description ? `<p style="font-size:12px;color:#555;margin:0;">${mSys.description}</p>` : ""}
+          ${effectHtml}
         </div>`
       });
     }
 
-    const comboResult = await this.#applyAttackSpendAndCombo({
-      paCost: finalCost,
-      isIniciador,
-      isCombo,
-      isRemate,
-      isGrapplerThrow: false
-    });
-
-    // Atributo de ataque (propiedad de Cualidad o attackStat del actor)
     const qualityProp = props.find((k) => Boolean(propMap[k]?.skillKey));
     const atkAttrKey = qualityProp
       ? WINGS_CONFIG.skills[propMap[qualityProp].skillKey]?.attr || "technique"
@@ -737,7 +703,6 @@ class WingsActor extends Actor {
     const atkAttrLabel = WINGS_CONFIG.attributes[atkAttrKey]?.label || atkAttrKey;
     const baseAtkMod = attrs[atkAttrKey]?.value ?? 0;
 
-    // Dados de arquetipo por propiedades de potencia
     const archDiceTerms = props
       .filter((k) => Boolean(propMap[k]?.archetypeDieTier))
       .map((k) => getArchetypeTierDie(sys.archetype, propMap[k].archetypeDieTier))
@@ -745,43 +710,122 @@ class WingsActor extends Actor {
 
     const hitCount = mSys.hitCount || 1;
     const perHitBase = mSys.perHitDamageBase ?? mSys.damageBase;
-    const finisherBonus = comboResult.isFinisherTriggered ? WINGS_CONFIG.combatRules.finisherBonusDamage : 0;
 
-    const hitSummaries = [];
-    for (let i = 0; i < hitCount; i += 1) {
-      const hitFinisher = i === hitCount - 1 ? finisherBonus : 0;
-      const flatPart = perHitBase + hitFinisher;
-      const dmgExpr = archDiceTerms.length ? `${archDiceTerms.join(" + ")} + ${flatPart}` : `${flatPart}`;
-      const dmgRoll = archDiceTerms.length ? await new Roll(dmgExpr).evaluate() : null;
-      const dmgTotal = dmgRoll ? dmgRoll.total : flatPart;
-      const dmgBreakdown = dmgRoll
-        ? `${archDiceTerms.join(" + ")} [${dmgRoll.dice.flatMap((d) => d.results.map((r) => r.result)).join(", ")}] + ${flatPart}`
-        : `${flatPart}`;
+    return this.#dispatchAttackSequence({
+      title: item.name,
+      paCost: finalCost,
+      tagsHtml,
+      atkFormula: "2d6 + @base",
+      atkRollData: { base: baseAtkMod },
+      atkDisplayFormula: `2d6 ${formatSignedTerm(baseAtkMod)}`,
+      atkStatLabel: atkAttrLabel,
+      archDiceTerms,
+      flatDmg: perHitBase,
+      hitCount,
+      isAutoHit,
+      isIniciador,
+      isCombo,
+      isRemate,
+      isGrapplerThrow: false,
+      effectHtml
+    });
+  }
 
-      let atkLine = "";
-      if (!comboResult.hitConfirmed && !isAutoHit) {
-        const atkRoll = await new Roll("2d6 + @base", { base: baseAtkMod }).evaluate();
-        if (i === 0) await this.#recordLastRoll(`2d6 ${formatSignedTerm(baseAtkMod)}`, item.name);
-        atkLine = `Ataque (${atkAttrLabel}): <strong>${atkRoll.total}</strong> <code>(2d6 [${atkRoll.dice[0].results.map((r) => r.result).join(",")}] ${formatSignedTerm(baseAtkMod)})</code> → `;
+  static async rollDamageFromMessage(message) {
+    const payload = message?.getFlag("wings-of-relience", "attackPayload");
+    if (!payload) return;
+
+    const actor = await fromUuid(payload.actorUuid);
+    if (!actor) return ui.notifications.warn("No se encontró el personaje atacante.");
+    if (!actor.isOwner) return ui.notifications.warn("No tienes permiso para tirar daño con este personaje.");
+
+    if (!payload.wasInCombo && payload.isIniciador && !message.getFlag("wings-of-relience", "comboConfirmed")) {
+      if (!actor.system.combat.inCombo) {
+        await actor.update({
+          "system.combat.inCombo": true,
+          "system.combat.comboHits": 1,
+          "system.combat.cancelNextFinisher": false
+        });
       }
-      hitSummaries.push(`<li>${hitCount > 1 ? `<strong>Impacto ${i + 1}:</strong> ` : ""}${atkLine}Daño: <strong style="color:#8e44ad;">${dmgTotal}</strong> <code>(${dmgBreakdown})</code></li>`);
+      if (message.isOwner) {
+        await message.setFlag("wings-of-relience", "comboConfirmed", true);
+      }
     }
 
-    const comboBannerHtml = this.#buildComboBannerHtml(comboResult);
-    const autoHitNote = isAutoHit && !comboResult.hitConfirmed
-      ? `<p style="color:#2e7d32;font-weight:bold;margin:3px 0;">Destino Seguro: impacta automáticamente si se cumplen las condiciones.</p>`
-      : "";
+    const dmgRoll = await new Roll(payload.dmgFormula).evaluate();
+    const diceResults = dmgRoll.dice.flatMap((d) => d.results.map((r) => r.result));
+    const breakdown = diceResults.length ? `${payload.dmgFormula} [${diceResults.join(", ")}]` : `${payload.dmgFormula}`;
+    const mtNote = payload.extraMitigation > 0
+      ? `Restar MT base +${payload.extraMitigation} del rival`
+      : "Restar MT del rival";
 
+    const damagePayload = {
+      damage: dmgRoll.total,
+      extraMitigation: payload.extraMitigation || 0,
+      ignoreMT: false,
+      sourceName: payload.actionName,
+      attackerName: actor.name
+    };
+
+    const applyBtnHtml = `<div style="margin-top:6px;">
+      <button type="button" data-wings-chat-action="applyDamage" style="width:100%;padding:5px 8px;background:#7f1d1d;color:#fff;border:1px solid #ff2e55;border-radius:3px;font-weight:bold;cursor:pointer;">
+        Aplicar Daño al Objetivo (${dmgRoll.total} - MT)
+      </button>
+    </div>`;
+
+    return dmgRoll.toMessage({
+      speaker: ChatMessage.getSpeaker({ actor }),
+      flags: { "wings-of-relience": { damagePayload } },
+      flavor: `<div>
+        <h3 style="margin:0;">Daño: ${payload.actionName}</h3>
+        <p style="font-size:14px;margin:4px 0;"><strong>Total:</strong> <span style="color:#c0392b;font-weight:bold;">${dmgRoll.total}</span> <code>(${breakdown})</code> <em>(${mtNote})</em></p>
+        ${payload.effectHtml || ""}
+        ${applyBtnHtml}
+      </div>`
+    });
+  }
+
+  static async applyDamageToTargets({ damage, extraMitigation = 0, ignoreMT = false, sourceName = "Ataque" }) {
+    const targets = game.user.targets?.size
+      ? [...game.user.targets]
+      : (canvas?.tokens?.controlled || []);
+
+    if (!targets.length) {
+      return ui.notifications.warn("Marca un objetivo (Target) o selecciona un token en el mapa para aplicar el daño.");
+    }
+
+    const appliedLines = [];
+    for (const token of targets) {
+      const targetActor = token.actor;
+      if (!targetActor) continue;
+      if (!targetActor.isOwner) {
+        ui.notifications.warn(`Solo el DJ o propietario de ${targetActor.name} puede aplicarle daño.`);
+        continue;
+      }
+
+      const baseMT = targetActor.system.derived?.mt ?? 0;
+      const totalMT = ignoreMT ? 0 : baseMT + extraMitigation;
+      const netDamage = Math.max(0, damage - totalMT);
+      const prevHP = targetActor.system.resources.hp.value;
+      const nextHP = Math.max(0, prevHP - netDamage);
+
+      await targetActor.update({ "system.resources.hp.value": nextHP });
+
+      const defeatNote = nextHP === 0 && prevHP > 0
+        ? `<br/><strong>${targetActor.name} cae a 0 HP (Inconsciente).</strong> (+2 Confianza al atacante por derrotar oponente)`
+        : "";
+      const mtText = ignoreMT ? "ignora MT" : `${damage} - ${totalMT} MT`;
+
+      appliedLines.push(
+        `<li><strong>${targetActor.name}</strong> recibe <strong style="color:#c0392b;">${netDamage}</strong> de daño (${mtText}) — HP: <strong>${nextHP}/${targetActor.system.resources.hp.max}</strong>${defeatNote}</li>`
+      );
+    }
+
+    if (!appliedLines.length) return;
     return ChatMessage.create({
-      speaker: ChatMessage.getSpeaker({ actor: this }),
       content: `<div>
-        <h3 style="margin:0;">${item.name} (${finalCost} PA)</h3>
-        <div style="margin:4px 0;">${tagsHtml}</div>
-        ${comboBannerHtml}
-        ${autoHitNote}
-        <ul style="margin:4px 0 4px 16px;padding:0;">${hitSummaries.join("")}</ul>
-        ${propDescriptions ? `<ul style="font-size:12px;margin:4px 0 4px 16px;padding:0;">${propDescriptions}</ul>` : ""}
-        ${mSys.description ? `<p style="font-size:12px;color:#555;margin:0;">${mSys.description}</p>` : ""}
+        <h4 style="margin:0 0 4px;">Daño aplicado: ${sourceName}</h4>
+        <ul style="margin:0 0 0 16px;padding:0;">${appliedLines.join("")}</ul>
       </div>`
     });
   }
@@ -1020,6 +1064,143 @@ class WingsActor extends Actor {
       .filter(Boolean)
       .map((t) => `<span style="background:#333;color:#fff;padding:1px 5px;border-radius:3px;font-size:11px;margin-right:3px;">${t}</span>`)
       .join("");
+  }
+
+  async #dispatchAttackSequence({
+    title,
+    paCost,
+    tagsHtml,
+    atkFormula,
+    atkRollData,
+    atkDisplayFormula,
+    atkStatLabel = "",
+    archDiceTerms = [],
+    flatDmg = 0,
+    hitCount = 1,
+    isAutoHit = false,
+    isIniciador = false,
+    isCombo = false,
+    isRemate = false,
+    isGrapplerThrow = false,
+    effectHtml = ""
+  }) {
+    const sys = this.system;
+    const attrs = sys.attributes;
+    const wasInCombo = sys.combat.inCombo;
+
+    let comboResult = {
+      hitConfirmed: false,
+      newComboHits: 0,
+      extraMitigation: 0,
+      isFinisherTriggered: false,
+      cancelConsumed: false,
+      confidenceGain: 0,
+      grapplerBonusGain: 0,
+      nextConfidence: sys.resources.confidence.value,
+      comboEnded: false
+    };
+
+    if (wasInCombo) {
+      comboResult = await this.#applyAttackSpendAndCombo({
+        paCost,
+        isIniciador,
+        isCombo,
+        isRemate,
+        isGrapplerThrow
+      });
+    } else {
+      await this.update({ "system.resources.pa.value": sys.resources.pa.value - paCost });
+    }
+
+    const passiveHtml = this.#buildAttackPassiveNotes(sys.archetype, attrs, comboResult);
+    const comboBannerHtml = this.#buildComboBannerHtml(comboResult);
+    const messages = [];
+
+    for (let i = 0; i < hitCount; i += 1) {
+      const hitTitle = hitCount > 1 ? `${title} (Impacto ${i + 1}/${hitCount})` : title;
+      const finisherPart = comboResult.isFinisherTriggered && i === hitCount - 1
+        ? WINGS_CONFIG.combatRules.finisherBonusDamage
+        : 0;
+      const totalFlat = flatDmg + finisherPart;
+      const dmgFormula = archDiceTerms.length
+        ? `${archDiceTerms.join(" + ")} ${formatSignedTerm(totalFlat)}`
+        : `${totalFlat}`;
+
+      const attackPayload = {
+        actorUuid: this.uuid,
+        actionName: hitTitle,
+        dmgFormula,
+        extraMitigation: comboResult.extraMitigation,
+        isIniciador,
+        wasInCombo,
+        isFinisherTriggered: comboResult.isFinisherTriggered && i === hitCount - 1,
+        effectHtml
+      };
+
+      const grazeBtnHtml = !wasInCombo && sys.archetype === "heavyHitter"
+        ? `<button type="button" data-wings-chat-action="applyGrazeDamage" style="padding:5px 8px;background:#3a2c22;color:#ffd166;border:1px solid #ffb703;border-radius:3px;font-weight:bold;cursor:pointer;">Fallo &le;3 (${attrs.might.value} sin MT)</button>`
+        : "";
+
+      const buttonsHtml = `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">
+        <button type="button" data-wings-chat-action="rollDamage" style="flex:1;padding:5px 8px;background:#111722;color:#00e5ff;border:1px solid #00e5ff;border-radius:3px;font-weight:bold;cursor:pointer;">
+          Tirar Daño (${dmgFormula})
+        </button>
+        ${grazeBtnHtml}
+      </div>`;
+
+      if (wasInCombo) {
+        const msg = await ChatMessage.create({
+          speaker: ChatMessage.getSpeaker({ actor: this }),
+          flags: { "wings-of-relience": { attackPayload } },
+          content: `<div>
+            <h3 style="margin:0;">${hitTitle}${i === 0 ? ` (${paCost} PA)` : ""}</h3>
+            <div style="margin:4px 0;">${tagsHtml}</div>
+            ${i === 0 ? comboBannerHtml : ""}
+            ${passiveHtml}
+            ${effectHtml}
+            ${buttonsHtml}
+          </div>`
+        });
+        messages.push(msg);
+        continue;
+      }
+
+      if (isAutoHit) {
+        const msg = await ChatMessage.create({
+          speaker: ChatMessage.getSpeaker({ actor: this }),
+          flags: { "wings-of-relience": { attackPayload } },
+          content: `<div>
+            <h3 style="margin:0;">${hitTitle}${i === 0 ? ` (${paCost} PA)` : ""}</h3>
+            <div style="margin:4px 0;">${tagsHtml}</div>
+            <p style="color:#2e7d32;font-weight:bold;margin:4px 0;">Destino Seguro: impacta automáticamente si se cumplen las condiciones.</p>
+            ${passiveHtml}
+            ${effectHtml}
+            ${buttonsHtml}
+          </div>`
+        });
+        messages.push(msg);
+        continue;
+      }
+
+      const atkRoll = await new Roll(atkFormula, atkRollData).evaluate();
+      if (i === 0) await this.#recordLastRoll(atkDisplayFormula, title);
+
+      const statLabelNote = atkStatLabel ? ` <em>(${atkStatLabel})</em>` : "";
+      const msg = await atkRoll.toMessage({
+        speaker: ChatMessage.getSpeaker({ actor: this }),
+        flags: { "wings-of-relience": { attackPayload } },
+        flavor: `<div>
+          <h3 style="margin:0;">Tirada de Ataque: ${hitTitle}${i === 0 ? ` (${paCost} PA)` : ""}${statLabelNote}</h3>
+          <div style="margin:4px 0;">${tagsHtml}</div>
+          ${passiveHtml}
+          ${effectHtml}
+          ${buttonsHtml}
+        </div>`
+      });
+      messages.push(msg);
+    }
+
+    return messages.length === 1 ? messages[0] : messages;
   }
 
   async #recordLastRoll(formula, label) {
@@ -1447,4 +1628,34 @@ Hooks.on("updateCombat", async (combat, updateData) => {
     "system.combat.cancelNextFinisher": false,
     "system.combat.sprintBonus": 0
   });
+});
+
+Hooks.on("renderChatMessageHTML", (message, html) => {
+  const buttons = html.querySelectorAll("[data-wings-chat-action]");
+  if (!buttons.length) return;
+
+  for (const btn of buttons) {
+    btn.addEventListener("click", async (event) => {
+      event.preventDefault();
+      const action = btn.dataset.wingsChatAction;
+
+      if (action === "rollDamage") {
+        await WingsActor.rollDamageFromMessage(message);
+      } else if (action === "applyDamage") {
+        const dmgPayload = message.getFlag("wings-of-relience", "damagePayload");
+        if (dmgPayload) await WingsActor.applyDamageToTargets(dmgPayload);
+      } else if (action === "applyGrazeDamage") {
+        const atkPayload = message.getFlag("wings-of-relience", "attackPayload");
+        if (!atkPayload) return;
+        const actor = await fromUuid(atkPayload.actorUuid);
+        const mightVal = actor?.system?.attributes?.might?.value ?? 0;
+        await WingsActor.applyDamageToTargets({
+          damage: mightVal,
+          extraMitigation: 0,
+          ignoreMT: true,
+          sourceName: `${atkPayload.actionName} (Fallo <= 3 Heavy Hitter)`
+        });
+      }
+    });
+  }
 });

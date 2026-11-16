@@ -2,7 +2,7 @@
   "id": "wings-of-relience",
   "title": "The Wings of Relience",
   "description": "Sistema de rol táctico estilo Beat'em up y Fighting Games.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "compatibility": {
     "minimum": "14",
     "verified": "14"
